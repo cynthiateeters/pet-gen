@@ -1,9 +1,30 @@
 {
   "name": "pet-gen",
   "version": "1.0.0",
+  "description": "Generate pet images for HAP's Animal Placement demo using Runware API",
   "type": "module",
-  "description": "Generate pet images for HAP's Animal Placement demo",
+  "private": true,
+  "author": "Cynthia Teeters",
+  "license": "SEE LICENSE IN README.md",
+  "keywords": [
+    "ai-images",
+    "runware",
+    "flux",
+    "education",
+    "hap"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "generate": "node generate.js"
+  },
+  "files": [
+    "generate.js",
+    "pets.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "local"
   }
 }
