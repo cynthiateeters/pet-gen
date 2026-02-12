@@ -145,8 +145,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
 
 The pet images in the `images/` directory were generated using AI (FLUX.1 Schnell via Runware API) based on prompts designed and curated by Cynthia Teeters.
 
-**These images are proprietary to Cynthia Teeters and are not covered by the MIT license above.**
+**These images are proprietary and are NOT covered by the MIT license.**
 
-You may not use, copy, distribute, or create derivative works from these images without explicit written permission. The images are intended solely for use in HAP (Helpful Animal Placement) educational materials.
+**Do not use these images.** They are reserved exclusively for HAP (Helpful Animal Placement) educational materials by Cynthia Teeters. No copying, distribution, or derivative works permitted without explicit written permission.
 
 For licensing inquiries, contact the copyright holder.
