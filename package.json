@@ -1,0 +1,9 @@
+{
+  "name": "pet-gen",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Generate pet images for HAP's Animal Placement demo",
+  "scripts": {
+    "generate": "node generate.js"
+  }
+}
