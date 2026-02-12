@@ -91,6 +91,45 @@ To add personality without sacrificing visual consistency:
 | energetic    | excited    |
 | independent  | confident  |
 
+## On working with AI: iteration over perfection
+
+A common misconception about AI tools is that you need to craft the "perfect prompt" to get good results. This project demonstrates the opposite: **iteration beats perfection**.
+
+### How we actually developed the prompts
+
+We didn't sit down and write the final prompt formula on the first try. The process looked like this:
+
+1. **Started simple** — "a cat" (too generic, inconsistent styles)
+2. **Added style** — "cartoon cat" (better, but still varied wildly)
+3. **Added constraints** — "simple cartoon illustration of a cat, white background" (more consistent)
+4. **Refined details** — added "flat colors" to prevent shading variations
+5. **Added personality** — mapped temperament to expression words
+
+Each iteration taught us something. The "failures" weren't wasted — they informed the next attempt.
+
+### AI helping write prompts for AI
+
+Here's where it gets meta: Claude (a text AI) helped write prompts for FLUX (an image AI).
+
+This is a legitimate collaboration pattern:
+
+- **Claude understands language** — it can suggest which adjectives produce consistent results
+- **Claude sees patterns** — after a few test images, it can identify what's working
+- **Claude can systematize** — it turned individual prompts into a reusable formula
+
+Sometimes Claude even helped refine prompts for itself. When asked "how should we structure this data?", Claude proposed options, I reacted, and Claude refined based on my feedback. The AI was effectively prompting itself through the human.
+
+### What this means for students
+
+When you work with AI tools:
+
+- **Don't aim for perfect** — aim for "good enough to learn from"
+- **Iterate quickly** — try something, see what happens, adjust
+- **Use AI to help with AI** — ask one tool to help you use another
+- **Document your process** — the journey is as valuable as the destination
+
+The `prompt` field in each pet's data isn't just functional — it's a record of this iterative process, preserved for anyone who wants to understand how AI-generated content actually gets made.
+
 ## License
 
 MIT License
