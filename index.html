@@ -271,7 +271,7 @@
       <input
         type="text"
         class="search-box"
-        placeholder="Search by name, species, or description..."
+        placeholder="Search by name..."
         id="search"
       >
     </div>
@@ -282,14 +282,14 @@
       This is cleaner than parsing button text
     -->
     <div class="controls" id="filters">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="cat">Cats</button>
-      <button class="filter-btn" data-filter="dog">Dogs</button>
-      <button class="filter-btn" data-filter="small mammal">Small Mammals</button>
-      <button class="filter-btn" data-filter="bird">Birds</button>
-      <button class="filter-btn" data-filter="reptile">Reptiles</button>
-      <button class="filter-btn" data-filter="aquatic">Aquatic</button>
-      <button class="filter-btn" data-filter="special">Special Needs</button>
+      <button type="button" class="filter-btn active" data-filter="all">All</button>
+      <button type="button" class="filter-btn" data-filter="cat">Cats</button>
+      <button type="button" class="filter-btn" data-filter="dog">Dogs</button>
+      <button type="button" class="filter-btn" data-filter="small mammal">Small Mammals</button>
+      <button type="button" class="filter-btn" data-filter="bird">Birds</button>
+      <button type="button" class="filter-btn" data-filter="reptile">Reptiles</button>
+      <button type="button" class="filter-btn" data-filter="aquatic">Aquatic</button>
+      <button type="button" class="filter-btn" data-filter="special">Special Needs</button>
     </div>
 
     <!-- Stats display (updated by JavaScript) -->
@@ -513,22 +513,15 @@
           // Otherwise, match the species exactly
           return pet.species === currentFilter;
         })
-        // Second filter: by search query
+        // Second filter: by search query (name only)
         .filter(pet => {
           // Empty search shows all (that passed species filter)
           if (!searchQuery) return true;
 
-          // Convert query to lowercase for case-insensitive matching
-          const q = searchQuery.toLowerCase();
-
-          // Check if query matches any searchable field
+          // Check if name contains the search query (case-insensitive)
+          // .toLowerCase() on both sides ensures "whisker" matches "Whisker"
           // .includes() returns true if the string contains the substring
-          return pet.name.toLowerCase().includes(q) ||
-                 pet.species.toLowerCase().includes(q) ||
-                 pet.subcategory.toLowerCase().includes(q) ||
-                 pet.description.toLowerCase().includes(q) ||
-                 // Also search special needs if it exists
-                 (pet.specialNeeds && pet.specialNeeds.toLowerCase().includes(q));
+          return pet.name.toLowerCase().includes(searchQuery.toLowerCase());
         });
 
       // -----------------------------------------------------------------------
