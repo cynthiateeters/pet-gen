@@ -25,10 +25,11 @@
  * @license MIT
  *
  * @example
- * // Set your API key and run the script
- * // In terminal:
+ * // Terminal:
  * // export RUNWARE_API_KEY="your-key-here"
  * // node generate.js
+ *
+ * (Set your API key, then run the script)
  */
 
 // =============================================================================
@@ -128,8 +129,8 @@ if (!API_KEY) {
  *   temperament: "affectionate"
  * };
  * buildPrompt(pet);
- * // Returns: "simple cartoon illustration of a fluffy orange tabby cat
- * //           with green eyes, white background, friendly expression, flat colors"
+ * // => "simple cartoon illustration of a fluffy orange tabby cat
+ * //     with green eyes, white background, friendly expression, flat colors"
  */
 function buildPrompt(pet) {
   // Look up the expression word for this temperament

@@ -13,7 +13,6 @@
  * @license MIT (code) / All Rights Reserved (images)
  *
  * @example
- * // Import the data
  * import { pets, temperamentToExpression } from './pets.js';
  *
  * // Find a specific pet by ID
@@ -95,10 +94,7 @@
  * @type {Record<Temperament, string>}
  *
  * @example
- * // Get the expression for a playful pet
- * const expression = temperamentToExpression['playful']; // 'happy'
- *
- * // Build an image prompt
+ * const expression = temperamentToExpression['playful']; // => 'happy'
  * const prompt = `cartoon ${pet.prompt}, ${expression} expression`;
  */
 export const temperamentToExpression = {
