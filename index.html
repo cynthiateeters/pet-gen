@@ -415,60 +415,82 @@
     // =========================================================================
 
     /**
-     * Creates HTML for a single pet card.
+     * Creates a DOM element for a single pet card.
      *
      * This function demonstrates:
-     * - Template literals for HTML generation
-     * - Conditional class names (ternary operator)
-     * - Conditional rendering (short-circuit with &&)
+     * - DOM element creation with document.createElement()
+     * - Safe text insertion with textContent (prevents XSS)
+     * - Conditional rendering with if statements
+     *
+     * SECURITY NOTE: We use textContent instead of innerHTML to prevent
+     * XSS (Cross-Site Scripting) attacks. If pet data came from an API
+     * or user input, innerHTML could execute malicious scripts.
      *
      * @param {Object} pet - Pet object from the data array
-     * @returns {string} HTML string for the pet card
+     * @returns {HTMLElement} DOM element for the pet card
      *
      * @example
-     * const html = createCard(pets[0]);
-     * // => '<article class="card">...</article>'
+     * const card = createCard(pets[0]);
+     * grid.appendChild(card);
      */
     function createCard(pet) {
-      // Determine badge class based on status
-      // Uses chained ternary operator for three possible values
-      const badgeClass = pet.status === 'adopted' ? 'badge adopted' :
-                         pet.status === 'pending' ? 'badge pending' : 'badge';
+      // Create the card container
+      const article = document.createElement('article');
+      article.className = 'card';
 
-      // Build HTML using template literal
-      // Backticks allow multi-line strings and ${} expressions
-      return `
-        <article class="card">
-          <!-- Pet image - uses ID for filename -->
-          <img
-            src="images/${pet.id}.webp"
-            alt="${pet.name} - ${pet.species}"
-            loading="lazy"
-          >
+      // Create and configure the image
+      const img = document.createElement('img');
+      img.src = `images/${pet.id}.webp`;
+      img.alt = `${pet.name} - ${pet.species}`;
+      img.loading = 'lazy';
 
-          <div class="card-body">
-            <!-- Header with name and status badge -->
-            <div class="card-header">
-              <h2>${pet.name}</h2>
-              <span class="${badgeClass}">${pet.status}</span>
-            </div>
+      // Create card body container
+      const cardBody = document.createElement('div');
+      cardBody.className = 'card-body';
 
-            <!-- Species and subcategory -->
-            <p class="species">${pet.species} · ${pet.subcategory}</p>
+      // Create header with name and status
+      const cardHeader = document.createElement('div');
+      cardHeader.className = 'card-header';
 
-            <!-- Description text -->
-            <p class="description">${pet.description}</p>
+      const h2 = document.createElement('h2');
+      h2.textContent = pet.name;  // textContent is safe from XSS
 
-            <!--
-              Special needs callout (conditional rendering)
-              Only renders if pet.specialNeeds is truthy (not null)
-              The && operator short-circuits: if left side is falsy, returns it
-              If left side is truthy, returns right side
-            -->
-            ${pet.specialNeeds ? `<p class="special-needs">💜 ${pet.specialNeeds}</p>` : ''}
-          </div>
-        </article>
-      `;
+      const badge = document.createElement('span');
+      badge.className = pet.status === 'adopted' ? 'badge adopted' :
+                        pet.status === 'pending' ? 'badge pending' : 'badge';
+      badge.textContent = pet.status;  // textContent is safe from XSS
+
+      cardHeader.appendChild(h2);
+      cardHeader.appendChild(badge);
+
+      // Create species line
+      const species = document.createElement('p');
+      species.className = 'species';
+      species.textContent = `${pet.species} · ${pet.subcategory}`;
+
+      // Create description
+      const description = document.createElement('p');
+      description.className = 'description';
+      description.textContent = pet.description;  // textContent is safe from XSS
+
+      // Assemble card body
+      cardBody.appendChild(cardHeader);
+      cardBody.appendChild(species);
+      cardBody.appendChild(description);
+
+      // Add special needs callout if applicable
+      if (pet.specialNeeds) {
+        const specialNeeds = document.createElement('p');
+        specialNeeds.className = 'special-needs';
+        specialNeeds.textContent = `💜 ${pet.specialNeeds}`;
+        cardBody.appendChild(specialNeeds);
+      }
+
+      // Assemble the card
+      article.appendChild(img);
+      article.appendChild(cardBody);
+
+      return article;
     }
 
     /**
@@ -538,25 +560,33 @@
       stats.textContent = `Showing ${filtered.length} pets (${available} available)`;
 
       // -----------------------------------------------------------------------
-      // RENDER GRID with .map() and .join()
+      // RENDER GRID with .map() and .forEach()
       // -----------------------------------------------------------------------
 
+      // Clear the grid first
+      grid.replaceChildren();
+
       if (filtered.length === 0) {
-        // No results - show a helpful message
-        grid.innerHTML = '<div class="no-results">No pets found. Try a different search or filter.</div>';
+        // No results - show a helpful message (safe, hardcoded text)
+        const noResults = document.createElement('div');
+        noResults.className = 'no-results';
+        noResults.textContent = 'No pets found. Try a different search or filter.';
+        grid.appendChild(noResults);
       } else {
         /**
          * Transform and render pet data:
          *
-         * .map(createCard) - Transform each pet object into an HTML string
+         * .map(createCard) - Transform each pet object into a DOM element
          *   This calls createCard(pet) for each pet in the array
-         *   Returns a new array of HTML strings
+         *   Returns a new array of DOM elements
          *
-         * .join('') - Combine all HTML strings into one
-         *   The empty string '' means no separator between elements
-         *   Results in one continuous HTML string
+         * .forEach(card => grid.appendChild(card)) - Add each card to the grid
+         *   appendChild adds a DOM node as a child of the grid
+         *
+         * Using DOM manipulation instead of innerHTML prevents XSS attacks
+         * when data comes from untrusted sources (APIs, user input).
          */
-        grid.innerHTML = filtered.map(createCard).join('');
+        filtered.map(createCard).forEach(card => grid.appendChild(card));
       }
     }
 
