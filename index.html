@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAP - Helpful Animal Placement</title>
+  <style>
+    :root {
+      --bg: hsl(210, 20%, 98%);
+      --card-bg: hsl(0, 0%, 100%);
+      --text: hsl(210, 20%, 20%);
+      --text-muted: hsl(210, 10%, 50%);
+      --accent: hsl(200, 70%, 45%);
+      --accent-light: hsl(200, 70%, 95%);
+      --border: hsl(210, 20%, 90%);
+      --shadow: hsla(210, 20%, 20%, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 2rem;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .search-box {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      width: 300px;
+      transition: border-color 0.2s;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      background: var(--card-bg);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .stats {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+
+    .card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: var(--accent-light);
+    }
+
+    .card-body {
+      padding: 1rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      background: var(--accent-light);
+      color: var(--accent);
+      text-transform: capitalize;
+    }
+
+    .badge.adopted {
+      background: hsl(140, 50%, 90%);
+      color: hsl(140, 50%, 35%);
+    }
+
+    .badge.pending {
+      background: hsl(45, 80%, 90%);
+      color: hsl(45, 80%, 35%);
+    }
+
+    .species {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      text-transform: capitalize;
+    }
+
+    .description {
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+
+    .special-needs {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--accent);
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🐾 Helpful Animal Placement</h1>
+    <p class="tagline">Find your perfect companion</p>
+
+    <div class="controls">
+      <input
+        type="text"
+        class="search-box"
+        placeholder="Search by name, species, or description..."
+        id="search"
+      >
+    </div>
+
+    <div class="controls" id="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="cat">Cats</button>
+      <button class="filter-btn" data-filter="dog">Dogs</button>
+      <button class="filter-btn" data-filter="small mammal">Small Mammals</button>
+      <button class="filter-btn" data-filter="bird">Birds</button>
+      <button class="filter-btn" data-filter="reptile">Reptiles</button>
+      <button class="filter-btn" data-filter="aquatic">Aquatic</button>
+      <button class="filter-btn" data-filter="special">Special Needs</button>
+    </div>
+
+    <p class="stats" id="stats"></p>
+  </header>
+
+  <main class="grid" id="grid"></main>
+
+  <script type="module">
+    // Pet data (from pets.js)
+    const pets = [
+      { id: "a3f8c1", name: "Whisker", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "affectionate", status: "available", description: "A classic tabby who lives for chin scratches and sunny windowsills. Will greet you at the door every single day without fail." },
+      { id: "b7e2d4", name: "Marmalade", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "playful", status: "available", description: "This orange goofball has two speeds: zooming and napping. Favorite toy: anything that crinkles. Will make you laugh daily." },
+      { id: "c9a1f6", name: "Shadow", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "independent", status: "available", description: "A mysterious soul who enjoys quiet companionship. Will sit near you, not on you. Perfect for someone who respects boundaries." },
+      { id: "d2c5b8", name: "Snowball", species: "cat", subcategory: "kitten", specialNeeds: null, temperament: "playful", status: "pending", description: "Tiny but mighty! This curious kitten is learning the ropes and ready for adventure. Needs patient adopter for kitten antics." },
+      { id: "e6f3a2", name: "Mittens", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "calm", status: "available", description: "A laid-back sweetheart who gets along with everyone. Perfect for first-time cat owners. Low drama, high purrs." },
+      { id: "f1d8e7", name: "Tripod", species: "cat", subcategory: "adult", specialNeeds: "amputee", temperament: "affectionate", status: "available", description: "Lost a leg but not his spirit. This brave boy purrs louder than any cat we know. Doesn't know he's different, just knows he's loved." },
+      { id: "a8b4c3", name: "Sugar", species: "cat", subcategory: "senior", specialNeeds: "senior", temperament: "calm", status: "available", description: "A gentle senior who just wants a warm lap and a peaceful home. Low maintenance, high love. Already litter trained and drama-free." },
+      { id: "b3e9f5", name: "Byte", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "independent", status: "adopted", description: "HAP's first cat! Loves keyboards and will 'help' you code. Now living his best life with his forever family." },
+      { id: "c4a7d1", name: "Cache", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "affectionate", status: "adopted", description: "HAP's second cat! Named for her ability to hide treats everywhere. Expert napper, professional cuddler." },
+      { id: "d9f2b6", name: "Buddy", species: "dog", subcategory: "large", specialNeeds: null, temperament: "playful", status: "adopted", description: "The ultimate family dog. Loved kids, fetch, and belly rubs in equal measure. Found his forever home and couldn't be happier!" },
+      { id: "e1c8a4", name: "Luna", species: "dog", subcategory: "large", specialNeeds: null, temperament: "energetic", status: "available", description: "High-energy lab who needs lots of exercise. Perfect running partner or hiking buddy. Will keep you active!" },
+      { id: "f5d3e9", name: "Max", species: "dog", subcategory: "medium", specialNeeds: null, temperament: "playful", status: "available", description: "A curious beagle with an impressive nose. Loves sniffing out treats and going on walks. Food motivated, easy to train." },
+      { id: "a2b7c8", name: "Bella", species: "dog", subcategory: "large", specialNeeds: null, temperament: "calm", status: "available", description: "A well-trained shepherd looking for a job to do. Smart, loyal, and protective. Best with experienced dog owner." },
+      { id: "b8c1d5", name: "Charlie", species: "dog", subcategory: "medium", specialNeeds: null, temperament: "energetic", status: "available", description: "Smartest dog in the shelter! Knows 15 tricks and ready to learn more. Needs mental stimulation and an active family." },
+      { id: "c3e6f2", name: "Daisy", species: "dog", subcategory: "medium", specialNeeds: null, temperament: "affectionate", status: "available", description: "Total cuddle bug who thinks she's a lap dog. Velcro pup alert! Will follow you from room to room." },
+      { id: "d7a4b1", name: "Rocky", species: "dog", subcategory: "medium", specialNeeds: null, temperament: "calm", status: "available", description: "A chill bulldog who snores louder than he barks. Loves short walks and long naps. Perfect apartment companion." },
+      { id: "e9f8c6", name: "Coco", species: "dog", subcategory: "small", specialNeeds: null, temperament: "playful", status: "available", description: "Hypoallergenic poodle with a playful personality. Great for apartments and allergy sufferers. Smart and easy to train." },
+      { id: "f2d1a7", name: "Milo", species: "dog", subcategory: "small", specialNeeds: null, temperament: "shy", status: "available", description: "A tiny chi with a big heart. Takes time to warm up but bonds deeply. Needs patient adopter, no small children please." },
+      { id: "a6c3e4", name: "Ziggy", species: "dog", subcategory: "small", specialNeeds: null, temperament: "playful", status: "available", description: "Long and low, this wiener dog thinks he's huge. Surprisingly fast! Loves burrowing under blankets." },
+      { id: "b1f5d8", name: "Echo", species: "dog", subcategory: "large", specialNeeds: "blind", temperament: "calm", status: "available", description: "Blind but brave. Navigates by sound and has the sweetest howl. Adapts quickly to new spaces once he learns the layout." },
+      { id: "c8a2f9", name: "Hopper", species: "dog", subcategory: "small", specialNeeds: "amputee", temperament: "energetic", status: "available", description: "Three legs, zero limits. This terrier mix has more energy than dogs with four. Don't let the missing leg fool you!" },
+      { id: "d4e7b3", name: "Nugget", species: "small mammal", subcategory: "hamster", specialNeeds: null, temperament: "playful", status: "available", description: "A fluffy golden hamster who runs on his wheel all night. Peak entertainment value. Great starter pet for older kids." },
+      { id: "e2c9a1", name: "Peanut", species: "small mammal", subcategory: "hamster", specialNeeds: null, temperament: "shy", status: "available", description: "Tiny dwarf hamster who fits in your palm. Shy at first, then super curious. Nocturnal, so perfect for night owls." },
+      { id: "f6b8d4", name: "Patches", species: "small mammal", subcategory: "guinea pig", specialNeeds: null, temperament: "affectionate", status: "available", description: "Social guinea pig who squeaks when she hears the fridge open. Veggie lover. Does best with a guinea pig friend!" },
+      { id: "a9d2c7", name: "Cinnamon", species: "small mammal", subcategory: "guinea pig", specialNeeds: null, temperament: "calm", status: "available", description: "The calm one of the pair. Loves lap time and gentle pets. Would love to be adopted with Patches!" },
+      { id: "b5a1e6", name: "Thumper", species: "small mammal", subcategory: "rabbit", specialNeeds: null, temperament: "playful", status: "available", description: "A playful rabbit who binkies when he's happy. Watch out for zoomies! Litter trained and full of personality." },
+      { id: "c1f4d2", name: "Cotton", species: "small mammal", subcategory: "rabbit", specialNeeds: null, temperament: "shy", status: "available", description: "A shy white rabbit who needs patience. Once she trusts you, she's a total lovebug. Worth the wait!" },
+      { id: "d8e3b9", name: "Ginger", species: "small mammal", subcategory: "ferret", specialNeeds: null, temperament: "energetic", status: "available", description: "Mischievous ferret who steals socks. Endless entertainment guaranteed. Ferret-proof your home first!" },
+      { id: "e4a6c1", name: "Nibbles", species: "small mammal", subcategory: "chinchilla", specialNeeds: null, temperament: "shy", status: "available", description: "Soft chinchilla who gives dust baths like it's a spa day. Nocturnal and needs cool temperatures." },
+      { id: "f3c7d8", name: "Kiwi", species: "bird", subcategory: "parakeet", specialNeeds: null, temperament: "playful", status: "available", description: "Chatty green parakeet learning to say 'hello.' Loves mirrors and bells. Great first bird!" },
+      { id: "a1e4b5", name: "Sunny", species: "bird", subcategory: "parakeet", specialNeeds: null, temperament: "affectionate", status: "available", description: "This yellow parakeet will sit on your shoulder all day. Total companion bird. Loves to sing along to music." },
+      { id: "b6d9a3", name: "Mango", species: "bird", subcategory: "cockatiel", specialNeeds: null, temperament: "calm", status: "available", description: "Whistling cockatiel who does a great doorbell impression. Very social, loves head scratches." },
+      { id: "c2f1e8", name: "Rio", species: "bird", subcategory: "parakeet", specialNeeds: null, temperament: "energetic", status: "available", description: "Vibrant blue parakeet with serious attitude. Small bird, big personality. Needs room to fly!" },
+      { id: "d5b2c4", name: "Peaches", species: "bird", subcategory: "lovebird", specialNeeds: null, temperament: "affectionate", status: "available", description: "A lovebird who lives up to the name. Needs lots of attention and gives it back tenfold. Velcro bird!" },
+      { id: "e8a9f7", name: "Phoenix", species: "bird", subcategory: "cockatiel", specialNeeds: "rescue", temperament: "shy", status: "available", description: "Rescue cockatiel still growing back feathers. Gentle soul who's been through a lot. Needs patient, quiet home." },
+      { id: "f4c2d6", name: "Spike", species: "reptile", subcategory: "lizard", specialNeeds: null, temperament: "calm", status: "available", description: "Friendly bearded dragon who loves basking and the occasional blueberry. Surprisingly personable for a reptile!" },
+      { id: "a7e8b1", name: "Scales", species: "reptile", subcategory: "lizard", specialNeeds: null, temperament: "shy", status: "available", description: "Shy leopard gecko who comes out at dusk. Beautiful spotted pattern. Low maintenance, great for beginners." },
+      { id: "b2d4c9", name: "Pretzel", species: "reptile", subcategory: "snake", specialNeeds: null, temperament: "calm", status: "available", description: "Docile ball python who curls up in the cutest shapes. Great for first-time snake owners. Eats frozen/thawed." },
+      { id: "c6a3e5", name: "Shelly", species: "reptile", subcategory: "turtle", specialNeeds: null, temperament: "calm", status: "available", description: "Red-eared slider who loves her basking spot. Watching her swim is so calming. Long-term commitment pet!" },
+      { id: "d1f7b4", name: "Rex", species: "reptile", subcategory: "lizard", specialNeeds: null, temperament: "independent", status: "available", description: "Blue-tongued skink with a funny defensive pose. Actually a big softy once comfortable. Loves snails!" },
+      { id: "e3c5a8", name: "Mossy", species: "reptile", subcategory: "lizard", specialNeeds: null, temperament: "shy", status: "available", description: "Crested gecko with adorable eyelash ridges. Nocturnal and low-maintenance. Doesn't need live bugs!" },
+      { id: "f9b6d3", name: "Bubbles", species: "aquatic", subcategory: "fish", specialNeeds: null, temperament: "calm", status: "available", description: "Classic goldfish who's been here the longest. Simple but soothing. Needs proper tank, not a bowl!" },
+      { id: "a4d1e2", name: "Nemo", species: "aquatic", subcategory: "fish", specialNeeds: null, temperament: "playful", status: "available", description: "Clownfish with major personality. Darts around his anemone all day. Saltwater setup required." },
+      { id: "b9c8f4", name: "Pearl", species: "aquatic", subcategory: "fish", specialNeeds: null, temperament: "calm", status: "available", description: "Elegant white betta with flowing fins like a wedding dress. Prefers peaceful tank, solo only." },
+      { id: "c5e2a6", name: "Coral", species: "aquatic", subcategory: "fish", specialNeeds: null, temperament: "independent", status: "available", description: "Feisty red betta who flares at her own reflection. Dramatic and beautiful. Solo tank only!" },
+      { id: "d3f9b7", name: "Splash", species: "aquatic", subcategory: "amphibian", specialNeeds: null, temperament: "calm", status: "available", description: "Axolotl with a permanent smile. Alien-cute and easier to care for than you'd think. Needs cold water." },
+      { id: "e7a2c8", name: "Dot", species: "aquatic", subcategory: "amphibian", specialNeeds: null, temperament: "shy", status: "available", description: "Tiny African dwarf frog who hides in plants. Comes out at feeding time. Fully aquatic, easy keeper." },
+      { id: "f1b4d9", name: "Finn", species: "aquatic", subcategory: "fish", specialNeeds: null, temperament: "calm", status: "available", description: "Royal blue betta who builds bubble nests. Looking for a quiet corner spot. Stunning colors!" },
+    ];
+
+    // DOM elements
+    const searchInput = document.getElementById('search');
+    const filtersContainer = document.getElementById('filters');
+    const grid = document.getElementById('grid');
+    const stats = document.getElementById('stats');
+
+    // State
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    // Create pet card HTML
+    function createCard(pet) {
+      const badgeClass = pet.status === 'adopted' ? 'badge adopted' :
+                         pet.status === 'pending' ? 'badge pending' : 'badge';
+
+      return `
+        <article class="card">
+          <img src="images/${pet.id}.webp" alt="${pet.name} - ${pet.species}" loading="lazy">
+          <div class="card-body">
+            <div class="card-header">
+              <h2>${pet.name}</h2>
+              <span class="${badgeClass}">${pet.status}</span>
+            </div>
+            <p class="species">${pet.species} · ${pet.subcategory}</p>
+            <p class="description">${pet.description}</p>
+            ${pet.specialNeeds ? `<p class="special-needs">💜 ${pet.specialNeeds}</p>` : ''}
+          </div>
+        </article>
+      `;
+    }
+
+    // Filter and render pets
+    function render() {
+      // Apply filters using array methods
+      const filtered = pets
+        .filter(pet => {
+          // Species/special filter
+          if (currentFilter === 'all') return true;
+          if (currentFilter === 'special') return pet.specialNeeds !== null;
+          return pet.species === currentFilter;
+        })
+        .filter(pet => {
+          // Search filter
+          if (!searchQuery) return true;
+          const q = searchQuery.toLowerCase();
+          return pet.name.toLowerCase().includes(q) ||
+                 pet.species.toLowerCase().includes(q) ||
+                 pet.subcategory.toLowerCase().includes(q) ||
+                 pet.description.toLowerCase().includes(q) ||
+                 (pet.specialNeeds && pet.specialNeeds.toLowerCase().includes(q));
+        });
+
+      // Update stats
+      const available = filtered.filter(p => p.status === 'available').length;
+      stats.textContent = `Showing ${filtered.length} pets (${available} available)`;
+
+      // Render grid using .map() and .join()
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="no-results">No pets found. Try a different search or filter.</div>';
+      } else {
+        grid.innerHTML = filtered.map(createCard).join('');
+      }
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      render();
+    });
+
+    filtersContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-btn')) {
+        // Update active state
+        filtersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Update filter
+        currentFilter = e.target.dataset.filter;
+        render();
+      }
+    });
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
