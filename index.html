@@ -1,34 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+  HAP - Helpful Animal Placement
+  Pet Browser Prototype
+
+  This file demonstrates JavaScript array methods in a real-world context:
+  - .filter() - Narrow down pets by species or special needs
+  - .map() - Transform pet data into HTML cards
+  - .join() - Combine array of HTML strings into one string
+
+  Teaching notes:
+  - Pet data is embedded inline (in production, this would come from an API)
+  - The UI uses event delegation for efficient click handling
+  - State is managed with simple variables (no framework needed for this scale)
+
+  Colors use HSL format as per project conventions.
+-->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HAP - Helpful Animal Placement</title>
+
+  <!--
+    CSS Custom Properties (variables) defined in :root
+    These allow consistent theming and easy customization.
+
+    HSL color format: hsl(hue, saturation%, lightness%)
+    - Hue: 0-360 (color wheel position)
+    - Saturation: 0-100% (gray to vivid)
+    - Lightness: 0-100% (black to white)
+  -->
   <style>
+    /* =======================================================================
+       CSS Custom Properties
+       Define colors once, use everywhere
+       ======================================================================= */
     :root {
-      --bg: hsl(210, 20%, 98%);
-      --card-bg: hsl(0, 0%, 100%);
-      --text: hsl(210, 20%, 20%);
-      --text-muted: hsl(210, 10%, 50%);
-      --accent: hsl(200, 70%, 45%);
-      --accent-light: hsl(200, 70%, 95%);
-      --border: hsl(210, 20%, 90%);
-      --shadow: hsla(210, 20%, 20%, 0.1);
+      /* Background colors */
+      --bg: hsl(210, 20%, 98%);           /* Page background - very light blue-gray */
+      --card-bg: hsl(0, 0%, 100%);        /* Card background - pure white */
+
+      /* Text colors */
+      --text: hsl(210, 20%, 20%);         /* Primary text - dark blue-gray */
+      --text-muted: hsl(210, 10%, 50%);   /* Secondary text - medium gray */
+
+      /* Accent colors */
+      --accent: hsl(200, 70%, 45%);       /* Primary accent - bright blue */
+      --accent-light: hsl(200, 70%, 95%); /* Light accent for badges */
+
+      /* Utility colors */
+      --border: hsl(210, 20%, 90%);       /* Border color - light gray */
+      --shadow: hsla(210, 20%, 20%, 0.1); /* Shadow with transparency */
     }
 
+    /* =======================================================================
+       Reset & Base Styles
+       ======================================================================= */
+
+    /* Universal box-sizing reset */
     * {
-      box-sizing: border-box;
+      box-sizing: border-box;  /* Include padding/border in width calculations */
       margin: 0;
       padding: 0;
     }
 
+    /* Body - page-level styles */
     body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;  /* Modern system fonts */
       background: var(--bg);
       color: var(--text);
       line-height: 1.5;
       padding: 2rem;
     }
+
+    /* =======================================================================
+       Header & Controls
+       ======================================================================= */
 
     header {
       max-width: 1200px;
@@ -46,85 +93,107 @@
       margin-bottom: 1.5rem;
     }
 
+    /* Flexbox container for controls */
     .controls {
       display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
+      flex-wrap: wrap;          /* Wrap to next line on small screens */
+      gap: 1rem;                /* Space between items */
       justify-content: center;
       margin-bottom: 1rem;
     }
 
+    /* Search input styling */
     .search-box {
       padding: 0.75rem 1rem;
       font-size: 1rem;
       border: 2px solid var(--border);
       border-radius: 8px;
       width: 300px;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s;  /* Smooth focus effect */
     }
 
+    /* Focus state - visual feedback when typing */
     .search-box:focus {
-      outline: none;
-      border-color: var(--accent);
+      outline: none;                    /* Remove default outline */
+      border-color: var(--accent);      /* Show accent color instead */
     }
 
+    /* Filter button styling */
     .filter-btn {
       padding: 0.5rem 1rem;
       font-size: 0.875rem;
       border: 2px solid var(--border);
-      border-radius: 20px;
+      border-radius: 20px;              /* Pill shape */
       background: var(--card-bg);
       cursor: pointer;
       transition: all 0.2s;
     }
 
+    /* Hover state */
     .filter-btn:hover {
       border-color: var(--accent);
     }
 
+    /* Active/selected state */
     .filter-btn.active {
       background: var(--accent);
       border-color: var(--accent);
       color: white;
     }
 
+    /* Stats text below filters */
     .stats {
       color: var(--text-muted);
       font-size: 0.875rem;
     }
 
+    /* =======================================================================
+       Card Grid Layout
+       CSS Grid provides responsive columns without media queries
+       ======================================================================= */
+
     .grid {
       display: grid;
+      /* auto-fill creates as many 250px columns as will fit
+         minmax ensures minimum 250px, can grow to fill space */
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 1.5rem;
       max-width: 1200px;
       margin: 0 auto;
     }
 
+    /* =======================================================================
+       Pet Cards
+       ======================================================================= */
+
     .card {
       background: var(--card-bg);
       border-radius: 12px;
-      overflow: hidden;
+      overflow: hidden;                    /* Clip image corners */
       box-shadow: 0 2px 8px var(--shadow);
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
+    /* Hover effect - lift the card */
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 24px var(--shadow);
     }
 
+    /* Card image */
     .card img {
       width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      background: var(--accent-light);
+      aspect-ratio: 1;            /* Square images */
+      object-fit: cover;          /* Cover the space, crop if needed */
+      background: var(--accent-light);  /* Placeholder color while loading */
     }
 
+    /* Card content area */
     .card-body {
       padding: 1rem;
     }
 
+    /* Name and status row */
     .card-header {
       display: flex;
       justify-content: space-between;
@@ -136,6 +205,7 @@
       font-size: 1.25rem;
     }
 
+    /* Status badges */
     .badge {
       font-size: 0.75rem;
       padding: 0.25rem 0.5rem;
@@ -145,16 +215,19 @@
       text-transform: capitalize;
     }
 
+    /* Adopted badge - green variant */
     .badge.adopted {
       background: hsl(140, 50%, 90%);
       color: hsl(140, 50%, 35%);
     }
 
+    /* Pending badge - yellow variant */
     .badge.pending {
       background: hsl(45, 80%, 90%);
       color: hsl(45, 80%, 35%);
     }
 
+    /* Species/subcategory line */
     .species {
       font-size: 0.875rem;
       color: var(--text-muted);
@@ -162,30 +235,38 @@
       text-transform: capitalize;
     }
 
+    /* Description text */
     .description {
       font-size: 0.875rem;
       color: var(--text);
     }
 
+    /* Special needs callout */
     .special-needs {
       margin-top: 0.5rem;
       font-size: 0.75rem;
       color: var(--accent);
     }
 
+    /* No results message */
     .no-results {
       text-align: center;
       padding: 3rem;
       color: var(--text-muted);
-      grid-column: 1 / -1;
+      grid-column: 1 / -1;  /* Span all columns */
     }
   </style>
 </head>
 <body>
+  <!--
+    Page Header
+    Contains title, search box, and filter buttons
+  -->
   <header>
-    <h1>🐾 Helpful Animal Placement</h1>
+    <h1>Helpful Animal Placement</h1>
     <p class="tagline">Find your perfect companion</p>
 
+    <!-- Search input -->
     <div class="controls">
       <input
         type="text"
@@ -195,6 +276,11 @@
       >
     </div>
 
+    <!--
+      Filter Buttons
+      data-filter attribute stores the filter value
+      This is cleaner than parsing button text
+    -->
     <div class="controls" id="filters">
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn" data-filter="cat">Cats</button>
@@ -206,14 +292,34 @@
       <button class="filter-btn" data-filter="special">Special Needs</button>
     </div>
 
+    <!-- Stats display (updated by JavaScript) -->
     <p class="stats" id="stats"></p>
   </header>
 
+  <!-- Pet card grid (populated by JavaScript) -->
   <main class="grid" id="grid"></main>
 
+  <!--
+    JavaScript Module
+    type="module" enables ES6 import/export syntax
+    and provides strict mode by default
+  -->
   <script type="module">
-    // Pet data (from pets.js)
+    // =========================================================================
+    // PET DATA
+    // =========================================================================
+
+    /**
+     * Pet data array - same structure as pets.js but without the prompt field
+     * (not needed for display, only for image generation).
+     *
+     * In a production app, this would be fetched from an API:
+     * const pets = await fetch('/api/pets').then(r => r.json());
+     *
+     * @type {Array<Object>}
+     */
     const pets = [
+      // --- CATS (9) ---
       { id: "a3f8c1", name: "Whisker", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "affectionate", status: "available", description: "A classic tabby who lives for chin scratches and sunny windowsills. Will greet you at the door every single day without fail." },
       { id: "b7e2d4", name: "Marmalade", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "playful", status: "available", description: "This orange goofball has two speeds: zooming and napping. Favorite toy: anything that crinkles. Will make you laugh daily." },
       { id: "c9a1f6", name: "Shadow", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "independent", status: "available", description: "A mysterious soul who enjoys quiet companionship. Will sit near you, not on you. Perfect for someone who respects boundaries." },
@@ -223,6 +329,8 @@
       { id: "a8b4c3", name: "Sugar", species: "cat", subcategory: "senior", specialNeeds: "senior", temperament: "calm", status: "available", description: "A gentle senior who just wants a warm lap and a peaceful home. Low maintenance, high love. Already litter trained and drama-free." },
       { id: "b3e9f5", name: "Byte", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "independent", status: "adopted", description: "HAP's first cat! Loves keyboards and will 'help' you code. Now living his best life with his forever family." },
       { id: "c4a7d1", name: "Cache", species: "cat", subcategory: "adult", specialNeeds: null, temperament: "affectionate", status: "adopted", description: "HAP's second cat! Named for her ability to hide treats everywhere. Expert napper, professional cuddler." },
+
+      // --- DOGS (12) ---
       { id: "d9f2b6", name: "Buddy", species: "dog", subcategory: "large", specialNeeds: null, temperament: "playful", status: "adopted", description: "The ultimate family dog. Loved kids, fetch, and belly rubs in equal measure. Found his forever home and couldn't be happier!" },
       { id: "e1c8a4", name: "Luna", species: "dog", subcategory: "large", specialNeeds: null, temperament: "energetic", status: "available", description: "High-energy lab who needs lots of exercise. Perfect running partner or hiking buddy. Will keep you active!" },
       { id: "f5d3e9", name: "Max", species: "dog", subcategory: "medium", specialNeeds: null, temperament: "playful", status: "available", description: "A curious beagle with an impressive nose. Loves sniffing out treats and going on walks. Food motivated, easy to train." },
@@ -235,6 +343,8 @@
       { id: "a6c3e4", name: "Ziggy", species: "dog", subcategory: "small", specialNeeds: null, temperament: "playful", status: "available", description: "Long and low, this wiener dog thinks he's huge. Surprisingly fast! Loves burrowing under blankets." },
       { id: "b1f5d8", name: "Echo", species: "dog", subcategory: "large", specialNeeds: "blind", temperament: "calm", status: "available", description: "Blind but brave. Navigates by sound and has the sweetest howl. Adapts quickly to new spaces once he learns the layout." },
       { id: "c8a2f9", name: "Hopper", species: "dog", subcategory: "small", specialNeeds: "amputee", temperament: "energetic", status: "available", description: "Three legs, zero limits. This terrier mix has more energy than dogs with four. Don't let the missing leg fool you!" },
+
+      // --- SMALL MAMMALS (8) ---
       { id: "d4e7b3", name: "Nugget", species: "small mammal", subcategory: "hamster", specialNeeds: null, temperament: "playful", status: "available", description: "A fluffy golden hamster who runs on his wheel all night. Peak entertainment value. Great starter pet for older kids." },
       { id: "e2c9a1", name: "Peanut", species: "small mammal", subcategory: "hamster", specialNeeds: null, temperament: "shy", status: "available", description: "Tiny dwarf hamster who fits in your palm. Shy at first, then super curious. Nocturnal, so perfect for night owls." },
       { id: "f6b8d4", name: "Patches", species: "small mammal", subcategory: "guinea pig", specialNeeds: null, temperament: "affectionate", status: "available", description: "Social guinea pig who squeaks when she hears the fridge open. Veggie lover. Does best with a guinea pig friend!" },
@@ -243,18 +353,24 @@
       { id: "c1f4d2", name: "Cotton", species: "small mammal", subcategory: "rabbit", specialNeeds: null, temperament: "shy", status: "available", description: "A shy white rabbit who needs patience. Once she trusts you, she's a total lovebug. Worth the wait!" },
       { id: "d8e3b9", name: "Ginger", species: "small mammal", subcategory: "ferret", specialNeeds: null, temperament: "energetic", status: "available", description: "Mischievous ferret who steals socks. Endless entertainment guaranteed. Ferret-proof your home first!" },
       { id: "e4a6c1", name: "Nibbles", species: "small mammal", subcategory: "chinchilla", specialNeeds: null, temperament: "shy", status: "available", description: "Soft chinchilla who gives dust baths like it's a spa day. Nocturnal and needs cool temperatures." },
+
+      // --- BIRDS (6) ---
       { id: "f3c7d8", name: "Kiwi", species: "bird", subcategory: "parakeet", specialNeeds: null, temperament: "playful", status: "available", description: "Chatty green parakeet learning to say 'hello.' Loves mirrors and bells. Great first bird!" },
       { id: "a1e4b5", name: "Sunny", species: "bird", subcategory: "parakeet", specialNeeds: null, temperament: "affectionate", status: "available", description: "This yellow parakeet will sit on your shoulder all day. Total companion bird. Loves to sing along to music." },
       { id: "b6d9a3", name: "Mango", species: "bird", subcategory: "cockatiel", specialNeeds: null, temperament: "calm", status: "available", description: "Whistling cockatiel who does a great doorbell impression. Very social, loves head scratches." },
       { id: "c2f1e8", name: "Rio", species: "bird", subcategory: "parakeet", specialNeeds: null, temperament: "energetic", status: "available", description: "Vibrant blue parakeet with serious attitude. Small bird, big personality. Needs room to fly!" },
       { id: "d5b2c4", name: "Peaches", species: "bird", subcategory: "lovebird", specialNeeds: null, temperament: "affectionate", status: "available", description: "A lovebird who lives up to the name. Needs lots of attention and gives it back tenfold. Velcro bird!" },
       { id: "e8a9f7", name: "Phoenix", species: "bird", subcategory: "cockatiel", specialNeeds: "rescue", temperament: "shy", status: "available", description: "Rescue cockatiel still growing back feathers. Gentle soul who's been through a lot. Needs patient, quiet home." },
+
+      // --- REPTILES (6) ---
       { id: "f4c2d6", name: "Spike", species: "reptile", subcategory: "lizard", specialNeeds: null, temperament: "calm", status: "available", description: "Friendly bearded dragon who loves basking and the occasional blueberry. Surprisingly personable for a reptile!" },
       { id: "a7e8b1", name: "Scales", species: "reptile", subcategory: "lizard", specialNeeds: null, temperament: "shy", status: "available", description: "Shy leopard gecko who comes out at dusk. Beautiful spotted pattern. Low maintenance, great for beginners." },
       { id: "b2d4c9", name: "Pretzel", species: "reptile", subcategory: "snake", specialNeeds: null, temperament: "calm", status: "available", description: "Docile ball python who curls up in the cutest shapes. Great for first-time snake owners. Eats frozen/thawed." },
       { id: "c6a3e5", name: "Shelly", species: "reptile", subcategory: "turtle", specialNeeds: null, temperament: "calm", status: "available", description: "Red-eared slider who loves her basking spot. Watching her swim is so calming. Long-term commitment pet!" },
       { id: "d1f7b4", name: "Rex", species: "reptile", subcategory: "lizard", specialNeeds: null, temperament: "independent", status: "available", description: "Blue-tongued skink with a funny defensive pose. Actually a big softy once comfortable. Loves snails!" },
       { id: "e3c5a8", name: "Mossy", species: "reptile", subcategory: "lizard", specialNeeds: null, temperament: "shy", status: "available", description: "Crested gecko with adorable eyelash ridges. Nocturnal and low-maintenance. Doesn't need live bugs!" },
+
+      // --- AQUATIC (7) ---
       { id: "f9b6d3", name: "Bubbles", species: "aquatic", subcategory: "fish", specialNeeds: null, temperament: "calm", status: "available", description: "Classic goldfish who's been here the longest. Simple but soothing. Needs proper tank, not a bowl!" },
       { id: "a4d1e2", name: "Nemo", species: "aquatic", subcategory: "fish", specialNeeds: null, temperament: "playful", status: "available", description: "Clownfish with major personality. Darts around his anemone all day. Saltwater setup required." },
       { id: "b9c8f4", name: "Pearl", species: "aquatic", subcategory: "fish", specialNeeds: null, temperament: "calm", status: "available", description: "Elegant white betta with flowing fins like a wedding dress. Prefers peaceful tank, solo only." },
@@ -264,89 +380,251 @@
       { id: "f1b4d9", name: "Finn", species: "aquatic", subcategory: "fish", specialNeeds: null, temperament: "calm", status: "available", description: "Royal blue betta who builds bubble nests. Looking for a quiet corner spot. Stunning colors!" },
     ];
 
-    // DOM elements
+    // =========================================================================
+    // DOM REFERENCES
+    // =========================================================================
+
+    /**
+     * Cache DOM element references for performance.
+     * Looking up elements once is faster than repeated queries.
+     */
     const searchInput = document.getElementById('search');
     const filtersContainer = document.getElementById('filters');
     const grid = document.getElementById('grid');
     const stats = document.getElementById('stats');
 
-    // State
+    // =========================================================================
+    // APPLICATION STATE
+    // =========================================================================
+
+    /**
+     * Current filter selection.
+     * 'all' shows all pets, otherwise filter by species or 'special' for special needs.
+     * @type {string}
+     */
     let currentFilter = 'all';
+
+    /**
+     * Current search query (lowercase for case-insensitive matching).
+     * @type {string}
+     */
     let searchQuery = '';
 
-    // Create pet card HTML
+    // =========================================================================
+    // RENDERING FUNCTIONS
+    // =========================================================================
+
+    /**
+     * Creates HTML for a single pet card.
+     *
+     * This function demonstrates:
+     * - Template literals for HTML generation
+     * - Conditional class names (ternary operator)
+     * - Conditional rendering (short-circuit with &&)
+     *
+     * @param {Object} pet - Pet object from the data array
+     * @returns {string} HTML string for the pet card
+     *
+     * @example
+     * const html = createCard(pets[0]);
+     * // Returns: '<article class="card">...</article>'
+     */
     function createCard(pet) {
+      // Determine badge class based on status
+      // Uses chained ternary operator for three possible values
       const badgeClass = pet.status === 'adopted' ? 'badge adopted' :
                          pet.status === 'pending' ? 'badge pending' : 'badge';
 
+      // Build HTML using template literal
+      // Backticks allow multi-line strings and ${} expressions
       return `
         <article class="card">
-          <img src="images/${pet.id}.webp" alt="${pet.name} - ${pet.species}" loading="lazy">
+          <!-- Pet image - uses ID for filename -->
+          <img
+            src="images/${pet.id}.webp"
+            alt="${pet.name} - ${pet.species}"
+            loading="lazy"
+          >
+
           <div class="card-body">
+            <!-- Header with name and status badge -->
             <div class="card-header">
               <h2>${pet.name}</h2>
               <span class="${badgeClass}">${pet.status}</span>
             </div>
+
+            <!-- Species and subcategory -->
             <p class="species">${pet.species} · ${pet.subcategory}</p>
+
+            <!-- Description text -->
             <p class="description">${pet.description}</p>
+
+            <!--
+              Special needs callout (conditional rendering)
+              Only renders if pet.specialNeeds is truthy (not null)
+              The && operator short-circuits: if left side is falsy, returns it
+              If left side is truthy, returns right side
+            -->
             ${pet.specialNeeds ? `<p class="special-needs">💜 ${pet.specialNeeds}</p>` : ''}
           </div>
         </article>
       `;
     }
 
-    // Filter and render pets
+    /**
+     * Filters the pet array and renders the grid.
+     *
+     * This function demonstrates key array methods:
+     *
+     * 1. .filter() - Creates a new array with elements that pass the test
+     *    We chain two .filter() calls: one for species, one for search
+     *
+     * 2. .map() - Creates a new array by transforming each element
+     *    We transform pet objects into HTML strings
+     *
+     * 3. .join() - Combines array elements into a single string
+     *    We join HTML strings with no separator
+     *
+     * @returns {void}
+     */
     function render() {
-      // Apply filters using array methods
+      // -----------------------------------------------------------------------
+      // FILTERING with .filter()
+      // -----------------------------------------------------------------------
+
+      /**
+       * Apply filters using chained .filter() calls.
+       *
+       * .filter() creates a NEW array - it doesn't modify the original.
+       * The callback function is called for each element.
+       * If the callback returns true, the element is included.
+       * If the callback returns false, the element is excluded.
+       */
       const filtered = pets
+        // First filter: by species or special needs
         .filter(pet => {
-          // Species/special filter
+          // 'all' shows everything - return true for every pet
           if (currentFilter === 'all') return true;
+
+          // 'special' shows only pets with special needs
+          // !== null checks that specialNeeds has a value
           if (currentFilter === 'special') return pet.specialNeeds !== null;
+
+          // Otherwise, match the species exactly
           return pet.species === currentFilter;
         })
+        // Second filter: by search query
         .filter(pet => {
-          // Search filter
+          // Empty search shows all (that passed species filter)
           if (!searchQuery) return true;
+
+          // Convert query to lowercase for case-insensitive matching
           const q = searchQuery.toLowerCase();
+
+          // Check if query matches any searchable field
+          // .includes() returns true if the string contains the substring
           return pet.name.toLowerCase().includes(q) ||
                  pet.species.toLowerCase().includes(q) ||
                  pet.subcategory.toLowerCase().includes(q) ||
                  pet.description.toLowerCase().includes(q) ||
+                 // Also search special needs if it exists
                  (pet.specialNeeds && pet.specialNeeds.toLowerCase().includes(q));
         });
 
-      // Update stats
+      // -----------------------------------------------------------------------
+      // UPDATE STATS
+      // -----------------------------------------------------------------------
+
+      /**
+       * Count available pets in the filtered results.
+       * This is another .filter() example - filter then check .length
+       */
       const available = filtered.filter(p => p.status === 'available').length;
+
+      // Update the stats text
       stats.textContent = `Showing ${filtered.length} pets (${available} available)`;
 
-      // Render grid using .map() and .join()
+      // -----------------------------------------------------------------------
+      // RENDER GRID with .map() and .join()
+      // -----------------------------------------------------------------------
+
       if (filtered.length === 0) {
+        // No results - show a helpful message
         grid.innerHTML = '<div class="no-results">No pets found. Try a different search or filter.</div>';
       } else {
+        /**
+         * Transform and render pet data:
+         *
+         * .map(createCard) - Transform each pet object into an HTML string
+         *   This calls createCard(pet) for each pet in the array
+         *   Returns a new array of HTML strings
+         *
+         * .join('') - Combine all HTML strings into one
+         *   The empty string '' means no separator between elements
+         *   Results in one continuous HTML string
+         */
         grid.innerHTML = filtered.map(createCard).join('');
       }
     }
 
-    // Event listeners
-    searchInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value;
+    // =========================================================================
+    // EVENT LISTENERS
+    // =========================================================================
+
+    /**
+     * Search input handler.
+     *
+     * The 'input' event fires every time the input value changes.
+     * We update state and re-render on each keystroke.
+     */
+    searchInput.addEventListener('input', (event) => {
+      // Update search query state
+      searchQuery = event.target.value;
+      // Re-render with new filter
       render();
     });
 
-    filtersContainer.addEventListener('click', (e) => {
-      if (e.target.classList.contains('filter-btn')) {
-        // Update active state
-        filtersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
+    /**
+     * Filter button handler using event delegation.
+     *
+     * Instead of adding a listener to each button, we add ONE listener
+     * to the parent container. When a button is clicked, the event
+     * "bubbles up" to the parent, and we check what was clicked.
+     *
+     * Benefits:
+     * - Fewer event listeners (better performance)
+     * - Works with dynamically added buttons
+     * - Single place to manage filter logic
+     */
+    filtersContainer.addEventListener('click', (event) => {
+      // Check if the clicked element is a filter button
+      // (could also click on the container itself)
+      if (event.target.classList.contains('filter-btn')) {
+        // Remove 'active' class from all buttons
+        filtersContainer
+          .querySelectorAll('.filter-btn')
+          .forEach(btn => btn.classList.remove('active'));
 
-        // Update filter
-        currentFilter = e.target.dataset.filter;
+        // Add 'active' class to clicked button
+        event.target.classList.add('active');
+
+        // Update filter state from data-filter attribute
+        currentFilter = event.target.dataset.filter;
+
+        // Re-render with new filter
         render();
       }
     });
 
-    // Initial render
+    // =========================================================================
+    // INITIALIZATION
+    // =========================================================================
+
+    /**
+     * Initial render on page load.
+     * Since state defaults to 'all' filter and empty search,
+     * this shows all pets.
+     */
     render();
   </script>
 </body>
