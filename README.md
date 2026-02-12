@@ -16,7 +16,7 @@ HAP's Animal Placement is a fictional pet adoption site used to teach JavaScript
 
 3. **Crafted the prompt formula** — Getting consistent cartoon-style images required iteration. We landed on:
 
-   ```
+   ```text
    simple cartoon illustration of a [visual description], white background, [expression] expression, flat colors
    ```
 
@@ -126,18 +126,27 @@ When you work with AI tools:
 - **Don't aim for perfect** — aim for "good enough to learn from"
 - **Iterate quickly** — try something, see what happens, adjust
 - **Use AI to help with AI** — ask one tool to help you use another
+- **Save prompts from context** — when an AI generates something useful based on your current conversation, save that output. It becomes a portable artifact you can use to kickstart the same AI (or a different one) in a fresh context later. The AI's understanding of _this_ moment can seed _future_ moments.
 - **Document your process** — the journey is as valuable as the destination
 
 The `prompt` field in each pet's data isn't just functional — it's a record of this iterative process, preserved for anyone who wants to understand how AI-generated content actually gets made.
 
 ## License
 
-MIT License
+### Code (MIT License)
 
 Copyright (c) 2026 Cynthia Teeters
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of the code in this repository to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, subject to the above copyright notice being included.
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+### Images (All Rights Reserved)
+
+The pet images in the `images/` directory were generated using AI (FLUX.1 Schnell via Runware API) based on prompts designed and curated by Cynthia Teeters.
+
+**These images are proprietary to Cynthia Teeters and are not covered by the MIT license above.**
+
+You may not use, copy, distribute, or create derivative works from these images without explicit written permission. The images are intended solely for use in HAP (Helpful Animal Placement) educational materials.
+
+For licensing inquiries, contact the copyright holder.
